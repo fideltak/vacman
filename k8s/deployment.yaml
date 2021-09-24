@@ -1,0 +1,65 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: suginami
+  namespace: vaccine
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: suginami
+  template:
+    metadata:
+      labels:
+        app: suginami
+    spec:
+      containers:
+      - name: vaccine-checker
+        image: docker.io/fideltak/vaccine-checker:v0.1.5
+        env:
+        - name: VACCINE_RESERVATION_URL
+          value: "https://www.vaccine-info-suginami.org"
+        - name: VACCINE_ALL_PLACE_URL
+          value: "https://api-cache.vaccines.sciseed.jp/public/131156/department/"
+        - name: VACCINE_AVAILABLE_PLACE_URL
+          value: "https://api-cache.vaccines.sciseed.jp/public/131156/available_department/"
+        - name: LINE_TOKEN_FILE_PATH
+          value: "/app/config/tokens.conf"
+        - name: NOTIFY_DURATION_SEC
+          value: "1800" #30min
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "300m"
+        volumeMounts:
+        - name: conf-vol
+          mountPath: /app/config
+
+      - name: line-notify-web
+        image: docker.io/fideltak/line-notify-web:v0.1.5
+        env:
+        - name: LINE_TOKEN_FILE_PATH
+          value: "/app/config/tokens.conf"
+        - name: LINE_NOTIFY_CLIENT_ID
+          value: "YOUR LINE NOTIFY CLIENT ID"
+        - name: LINE_NOTIFY_CLIENT_SECRET
+          value: "YOUR LINE NOTIFY CLIENT SECRET"
+        - name: LINE_NOTIFY_CALLBACK_URL
+          value: "YOUR CALLBACK URL"
+        - name: WEB_SERVER_PORT
+          value: "80"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "200m"
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: conf-vol
+          mountPath: /app/config
+
+      volumes:
+        - name: conf-vol
+          persistentVolumeClaim:
+            claimName: suginami
