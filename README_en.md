@@ -1,3 +1,4 @@
+[日本語](README.md)
 # COVID-19 Vaccine Reservation Status Notification in Japan
 The vaccine reservation service by local government annoys me because difficult to find seat and no notification for empty seats. That's why I made this. I could reserve seat where I want after 2 hours from making this.
 
